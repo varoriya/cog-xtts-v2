@@ -18,8 +18,8 @@ class Predictor(BasePredictor):
         speaker: Path = Input(description="Original speaker audio (wav, mp3, m4a, ogg, or flv). Duration should be at least 6 seconds."),
         language: str = Input(
             description="Output language for the synthesised speech",
-            choices=["en", "es", "fr", "de", "it", "pt", "pl", "tr", "ru", "nl", "cs", "ar", "zh", "hu", "ko", "hi"],
-            default="en"
+            choices=["th" , "en", "es", "fr", "de", "it", "pt", "pl", "tr", "ru", "nl", "cs", "ar", "zh", "hu", "ko", "hi"],
+            default="th"
         ),
         cleanup_voice: bool = Input(
             description="Whether to apply denoising to the speaker audio (microphone recordings)",
