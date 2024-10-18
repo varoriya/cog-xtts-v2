@@ -1,25 +1,30 @@
 name: Push xtts-v2
-
+ 
 on:
   workflow_dispatch:
-
+    inputs:
+      model_name:
+        description: 'Enter the model name, like "alice/bunny-detector"'
+        required: true
+ 
 jobs:
-  build-and-push:
+  push_to_replicate:
+    name: Push to Replicate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4  # อัปเดตเป็น v4
-
-      - name: Set up Cog
-        uses: replicate/setup-cog@v2  # ตรวจสอบให้ใช้เวอร์ชันล่าสุด
-
-      - name: Free up disk space
-        uses: jlumbroso/free-disk-space@v1.0.0  # ใช้เวอร์ชันที่ถูกต้อง
-
-      - name: Upgrade pip
-        run: pip install --upgrade pip  # อัปเกรด pip
-
-      - name: Log in to Replicate
-        run: echo "${{ secrets.REPLICATE_API_TOKEN }}" | cog login --token-stdin
-
-      - name: Push model to Replicate
+      - name: Free disk pace
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          docker-images: false
+ 
+      - name: Checkout
+        uses: actions/checkout@v4
+ 
+      - name: Setup Cog
+        uses: replicate/setup-cog@v2
+        with:
+          token: ${{ secrets.REPLICATE_API_TOKEN }}
+        
+      - name: Push to Replicate
         run: cog push r8.im/varoriya/xtts-v2-thai
