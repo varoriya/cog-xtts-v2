@@ -7,10 +7,16 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4  # อัปเดตจาก v3 เป็น v4
+      - uses: actions/checkout@v4  # อัปเดตเป็น v4
 
       - name: Set up Cog
         uses: replicate/setup-cog@v2  # ตรวจสอบให้ใช้เวอร์ชันล่าสุด
+
+      - name: Free up disk space
+        uses: jlumbroso/free-disk-space@v1.0.0  # ใช้เวอร์ชันที่ถูกต้อง
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip  # อัปเกรด pip
 
       - name: Log in to Replicate
         run: echo "${{ secrets.REPLICATE_API_TOKEN }}" | cog login --token-stdin
