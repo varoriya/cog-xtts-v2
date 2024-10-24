@@ -12,15 +12,17 @@ jobs:
     name: Push to Replicate
     runs-on: ubuntu-latest
     steps:
-      - name: Free disk pace
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-          docker-images: false
- 
       - name: Checkout
         uses: actions/checkout@v4
- 
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/cog.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+    
       - name: Setup Cog
         uses: replicate/setup-cog@v2
         with:
@@ -29,3 +31,13 @@ jobs:
       - name: Push to Replicate
         run: cog push r8.im/${{ inputs.model_name }}
 
+      - name: Check disk usage
+        run: df -h
+
+      - name: List largest directories
+        run: du -h --max-depth=1 | sort -rh | head -n 10
+
+      - name: Clean up
+        run: |
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
