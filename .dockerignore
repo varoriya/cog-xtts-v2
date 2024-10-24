@@ -1,10 +1,3 @@
-.git
-.gitignore
-Dockerfile
-README.md
-*.log
-*.pyc
-__pycache__/
-*.pt
-*.pth
-*.h5
+__pycache__
+.cog
+TTS
