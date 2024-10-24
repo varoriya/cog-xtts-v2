@@ -23,17 +23,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
   
-      - name: Setup Cog
-        uses: replicate/setup-cog@v2
-        with:
-          token: ${{ secrets.REPLICATE_API_TOKEN }}
-
-      - name: Upgrade pip
-        run: pip install --upgrade pip
-
-      - name: Install Dependencies
-        run: cog install
-
       - name: Clean up
         run: |
           sudo apt-get clean
