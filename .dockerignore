@@ -1,17 +1,10 @@
-# The .dockerignore file excludes files from the container build process.
-#
-# https://docs.docker.com/engine/reference/builder/#dockerignore-file
-
-# Exclude Git files
 .git
-.github
 .gitignore
-
-# Exclude Python cache files
-__pycache__
-.mypy_cache
-.pytest_cache
-.ruff_cache
-
-# Exclude Python virtual environment
-/venv
+Dockerfile
+README.md
+*.log
+*.pyc
+__pycache__/
+*.pt
+*.pth
+*.h5
