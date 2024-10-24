@@ -1,11 +1,19 @@
-# Configuration for Cog ⚙️
 build:
   gpu: true
   cuda: "11.8"
+  python_version: "3.10"
   system_packages:
     - "ffmpeg"
-  python_version: "3.9"
+    - "libsndfile1"
+    - "libgomp1"
+    - "build-essential"
+    - "libffi-dev"
+    - "git"
+    - "python3.10-dev"
+    - "libssl-dev"
   python_packages:
+    - "pip>=24.2"
     - "git+https://github.com/coqui-ai/TTS.git"
-
-predict: "predict.py:Predictor"
+    - "numpy"
+    - "torch==2.4.0"
+    - "torchaudio==2.4.0"
