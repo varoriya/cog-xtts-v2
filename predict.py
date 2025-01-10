@@ -1,46 +1,38 @@
-# Prediction interface for Cog
 from cog import BasePredictor, Input, Path
+from huggingface_hub import snapshot_download
+import torch
 import os
-from TTS.api import TTS
 
 class Predictor(BasePredictor):
-    def setup(self) -> None:
-        """Load the model into memory to make running multiple predictions efficient"""
-        os.environ["COQUI_TOS_AGREED"] = "1"
-        self.model = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to('cuda')
+    def setup(self):
+        """โหลดโมเดล KhanomTan-TTS"""
+        # ดึงโมเดลจาก Hugging Face
+        model_path = snapshot_download(repo_id="wannaphong/khanomtan-tts-v1.0")
+        model_file = os.path.join(model_path, "best_model.pth")
+        
+        if not os.path.exists(model_file):
+            raise FileNotFoundError(f"Model file not found: {model_file}")
+
+        # โหลดโมเดลด้วย PyTorch
+        self.model = torch.load(model_file, map_location="cuda" if torch.cuda.is_available() else "cpu")
+        self.model.eval()
 
     def predict(
         self,
-        text: str = Input(
-            description="Text to synthesize",
-            default="Hi there, I'm your new voice clone. Try your best to upload quality audio"
-        ),
-        speaker: Path = Input(description="Original speaker audio (wav, mp3, m4a, ogg, or flv). Duration should be at least 6 seconds."),
-        language: str = Input(
-            description="Output language for the synthesised speech",
-            choices=["th" , "en", "es", "fr", "de", "it", "pt", "pl", "tr", "ru", "nl", "cs", "ar", "zh", "hu", "ko", "hi"],
-            default="th"
-        ),
-        cleanup_voice: bool = Input(
-            description="Whether to apply denoising to the speaker audio (microphone recordings)",
-            default=False
-        ),
+        text: str = Input(description="ข้อความที่ต้องการแปลงเป็นเสียง"),
+        speaker: Path = Input(description="ไฟล์เสียงของผู้พูด (ถ้ามี)", default=None),
+        language: str = Input(description="ภาษา (ไทยหรืออังกฤษ)", choices=["th", "en"], default="th"),
     ) -> Path:
-        """Run a single prediction on the model"""
-        speaker_wav = "/tmp/speaker.wav"
-        filter = "highpass=75,lowpass=8000,"
-        trim_silence = "areverse,silenceremove=start_periods=1:start_silence=0:start_threshold=0.02,areverse,silenceremove=start_periods=1:start_silence=0:start_threshold=0.02"
-        # ffmpeg convert to wav and apply afftn denoise filter. y to overwrite and avoid caching
-        if cleanup_voice:
-            os.system(f"ffmpeg -i {speaker} -af {filter}{trim_silence} -y {speaker_wav}")
+        """แปลงข้อความเป็นเสียง"""
+        output_path = "/tmp/output.wav"
+
+        # ถ้ามีไฟล์ speaker ให้เตรียมไฟล์
+        if speaker:
+            speaker_wav = "/tmp/speaker.wav"
+            os.system(f"ffmpeg -i {speaker} -ar 22050 -ac 1 -y {speaker_wav}")
         else:
-            os.system(f"ffmpeg -i {speaker} -y {speaker_wav}")
+            speaker_wav = None
 
-        path = self.model.tts_to_file(
-            text=text, 
-            file_path = "/tmp/output.wav",
-            speaker_wav = speaker_wav,
-            language = language
-        )
-
-        return Path(path)
+        # เรียกฟังก์ชัน text_to_speech
+        self.model.text_to_speech(text=text, output_path=output_path, speaker_wav=speaker_wav, language=language)
+        return Path(output_path)
